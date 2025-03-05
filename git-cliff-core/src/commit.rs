@@ -371,8 +371,15 @@ impl Commit<'_> {
 			}
 		}
 		if filter {
-			Err(AppError::GroupError(String::from(
-				"Commit does not belong to any group",
+			Err(AppError::GroupError(format!(
+				"Commit {id} does not belong to any group:\n{message}",
+				id = &self.id.chars().take(7).collect::<String>(),
+				message = self
+					.message
+					.lines()
+					.map(|line| { format!("    | {}", line.trim()) })
+					.collect::<Vec<String>>()
+					.join("\n")
 			)))
 		} else {
 			Ok(self)
