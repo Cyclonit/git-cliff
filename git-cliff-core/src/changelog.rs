@@ -653,13 +653,7 @@ impl<'a> Changelog<'a> {
 }
 
 fn get_body_template(config: &Config, trim: bool) -> Result<Template> {
-	let template_str = config
-		.changelog
-		.body
-		.as_deref()
-		.unwrap_or_default()
-		.to_string();
-	let template = Template::new("body", template_str, trim)?;
+	let template = Template::new("body", config.changelog.body.clone(), trim)?;
 	let deprecated_vars = [
 		"commit.github",
 		"commit.gitea",
@@ -694,7 +688,7 @@ mod test {
 		let config = Config {
 			changelog: ChangelogConfig {
 				header:         Some(String::from("# Changelog")),
-				body:           Some(String::from(
+				body:           String::from(
 					r#"{% if version %}
 				## Release [{{ version }}] - {{ timestamp | date(format="%Y-%m-%d") }} - ({{ repository }})
 				{% if commit_id %}({{ commit_id }}){% endif %}{% else %}
@@ -704,7 +698,7 @@ mod test {
 				#### {{ group }}{% for commit in commits %}
 				- {{ commit.message }}{% endfor %}
 				{% endfor %}{% endfor %}"#,
-				)),
+				),
 				footer:         Some(String::from(
 					r#"-- total releases: {{ releases | length }} --"#,
 				)),
@@ -1280,8 +1274,7 @@ chore(deps): fix broken deps
 	fn changelog_adds_additional_context() -> Result<()> {
 		let (mut config, releases) = get_test_data();
 		// add `{{ custom_field }}` to the template
-		config.changelog.body = Some(
-			r#"{% if version %}
+		config.changelog.body = r#"{% if version %}
 				## {{ custom_field }} [{{ version }}] - {{ timestamp | date(format="%Y-%m-%d") }}
 				{% if commit_id %}({{ commit_id }}){% endif %}{% else %}
 				## Unreleased{% endif %}
@@ -1290,8 +1283,7 @@ chore(deps): fix broken deps
 				#### {{ group }}{% for commit in commits %}
 				- {{ commit.message }}{% endfor %}
 				{% endfor %}{% endfor %}"#
-				.to_string(),
-		);
+			.to_string();
 		let mut changelog = Changelog::new(releases, &config)?;
 		changelog.add_context("custom_field", "Hello")?;
 		let mut out = Vec::new();

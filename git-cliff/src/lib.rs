@@ -508,10 +508,6 @@ pub fn run_with_changelog_modifier(
 		}
 		EmbeddedConfig::parse()?
 	};
-	if config.changelog.body.is_none() && !args.context && !args.bumped_version {
-		warn!("Changelog body is not specified, using the default template.");
-		config.changelog.body = EmbeddedConfig::parse()?.changelog.body;
-	}
 
 	// Update the configuration based on command line arguments and vice versa.
 	let output = args.output.clone().or(config.changelog.output.clone());
@@ -545,8 +541,8 @@ pub fn run_with_changelog_modifier(
 			 files",
 		)));
 	}
-	if args.body.is_some() {
-		config.changelog.body.clone_from(&args.body);
+	if let Some(body) = args.body.clone() {
+		config.changelog.body = body;
 	}
 	if args.sort == Sort::Oldest {
 		if let Some(ref sort_commits) = config.git.sort_commits {

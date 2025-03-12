@@ -1,4 +1,5 @@
 use crate::command;
+use crate::embed::EmbeddedConfig;
 use crate::error::Result;
 use regex::{
 	Regex,
@@ -72,7 +73,7 @@ pub struct ChangelogConfig {
 	/// Changelog header.
 	pub header:         Option<String>,
 	/// Changelog body, template.
-	pub body:           Option<String>,
+	pub body:           String,
 	/// Changelog footer.
 	pub footer:         Option<String>,
 	/// Trim the template.
@@ -441,7 +442,13 @@ impl Config {
 			}
 		}
 
+		let default_config_str = EmbeddedConfig::get_config()?;
+
 		Ok(config::Config::builder()
+			.add_source(config::File::from_str(
+				&default_config_str,
+				config::FileFormat::Toml,
+			))
 			.add_source(config::File::from(path))
 			.add_source(
 				config::Environment::with_prefix("GIT_CLIFF").separator("__"),

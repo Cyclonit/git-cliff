@@ -21,7 +21,7 @@ use std::fmt::Write;
 fn generate_changelog() -> Result<()> {
 	let changelog_config = ChangelogConfig {
 		header:         Some(String::from("this is a changelog")),
-		body:           Some(String::from(
+		body:           String::from(
 			r#"
 ## Release {{ version }} - <DATE>
 {% for group, commits in commits | group_by(attribute="group") %}
@@ -37,7 +37,7 @@ fn generate_changelog() -> Result<()> {
 {% endif -%}
 {% endfor -%}
 {% endfor %}"#,
-		)),
+		),
 		footer:         Some(String::from("eoc - end of changelog")),
 		trim:           None,
 		render_always:  None,
@@ -264,7 +264,7 @@ fn generate_changelog() -> Result<()> {
 	];
 
 	let out = &mut String::new();
-	let template = Template::new("test", changelog_config.body.unwrap(), false)?;
+	let template = Template::new("test", changelog_config.body, false)?;
 
 	writeln!(out, "{}", changelog_config.header.unwrap()).unwrap();
 	let text_processors = [TextProcessor {
